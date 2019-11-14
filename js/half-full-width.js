@@ -252,13 +252,25 @@ window.addEventListener('load', (event) => {
 	const input = document.getElementById('inputText');
 	const widthSelector = document.getElementById('widthSelector');
 	const output = document.getElementById('outputText');
+	const bothOption = document.createElement('option');
+	bothOption.setAttribute('value', 'both');
+	bothOption.innerText = '両方';
+	const invertOption = document.createElement('option');
+	invertOption.setAttribute('value', 'invert');
+	invertOption.innerText = '逆にする';
 	for (const key in halfToFull) {
 		const value = halfToFull[key];
 		fullToHalf[value] = key;
 	}
 	inputText.addEventListener('change', (event) => {
-		console.log(checkWidth(input.value));
-		widthSelector.value = checkWidth(input.value);
+		const widthType = checkWidth(input.value);
+		widthSelector.removeChild(bothOption);
+		widthSelector.removeChild(invertOption);
+		if (widthType === 'both') {
+			widthSelector.appendChild(bothOption);
+			widthSelector.appendChild(invertOption);
+		}
+		widthSelector.value = widthType;
 		output.value = '';
 	});
 	widthSelector.addEventListener('change', (event) => {
