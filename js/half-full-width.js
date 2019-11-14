@@ -278,7 +278,7 @@ window.addEventListener('load', (event) => {
 	widthSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkWidth(inputValue);
-		switch (caseSelector.value) {
+		switch (widthSelector.value) {
 			case 'half':
 				output.value = toHalfWidth(inputValue);
 				break;
