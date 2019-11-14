@@ -264,8 +264,10 @@ window.addEventListener('load', (event) => {
 	}
 	inputText.addEventListener('change', (event) => {
 		const widthType = checkWidth(input.value);
-		widthSelector.removeChild(bothOption);
-		widthSelector.removeChild(invertOption);
+		if (bothOption.parentNode === widthSelector) {
+			widthSelector.removeChild(bothOption);
+			widthSelector.removeChild(invertOption);
+		}
 		if (widthType === 'both') {
 			widthSelector.appendChild(bothOption);
 			widthSelector.appendChild(invertOption);
