@@ -3,7 +3,7 @@ function checkWidth(outputText) {
 	const fullWidth = Object.values(halfToFull);
 	let half = 0;
 	let full = 0;
-	for (const char of outputText) {
+	for (const char of InputText) {
 		if (halfWidth.includes(char)) {
 			half += 1;
 		} else if (fullWidth.includes(char)) {
@@ -18,6 +18,45 @@ function checkWidth(outputText) {
 	} else {
 		return 'both';
 	}
+}
+function toHalfWidth(InputText) {
+	const fullWidth = Object.values(halfToFull);
+	let outputText = '';
+	for (const char of InputText) {
+		if (fullWidth.includes(char)) {
+			outputText += fullToHalf[char];
+		} else {
+			outputText += char;
+		}
+	}
+	return outputText;
+}
+function toFullWidth(InputText) {
+	const halfWidth = Object.keys(halfToFull);
+	let outputText = '';
+	for (const char of InputText) {
+		if (halfWidth.includes(char)) {
+			outputText += halfToFull[char];
+		} else {
+			outputText += char;
+		}
+	}
+	return outputText;
+}
+function invertWidth(InputText) {
+	const halfWidth = Object.keys(halfToFull);
+	const fullWidth = Object.values(halfToFull);
+	let outputText = '';
+	for (const char of InputText) {
+		if (halfWidth.includes(char)) {
+			outputText += halfToFull[char];
+		} else if (fullWidth.includes(char)) {
+			outputText += fullToHalf[char];
+		} else {
+			outputText += char;
+		}
+	}
+	return outputText;
 }
 const halfToFull = {
 	' ': '　',
@@ -225,6 +264,17 @@ window.addEventListener('load', (event) => {
 	widthSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkWidth(inputValue);
-		output.value = To[caseSelector.value](From[inputFormat](inputValue));
+		switch (caseSelector.value) {
+			case 'half':
+				output.value = toHalfWidth(inputValue);
+				break;
+			case 'full':
+				output.value = toFullWidth(inputValue);
+				break;
+			case 'invert':
+				output.value = invertWidth(inputValue);
+				break;
+			default:
+		}
 	});
 });
