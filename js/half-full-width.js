@@ -1,8 +1,22 @@
 function checkWidth(outputText) {
 	const halfWidth = Object.keys(halfToFull);
 	const fullWidth = Object.values(halfToFull);
-	for (const index in outputText) {
-		console.log(outputText.charAt(index));
+	let half = 0;
+	let full = 0;
+	for (const char of outputText) {
+		if (halfWidth.includes(char)) {
+			half += 1;
+		} else if (fullWidth.includes(char)) {
+			full += 1;
+		} else {
+		}
+	}
+	if (half > 0 && full === 0) {
+		return 'half';
+	} else if (half === 0 && full > 0) {
+		return 'full';
+	} else {
+		return 'both';
 	}
 }
 const halfToFull = {
@@ -204,6 +218,7 @@ window.addEventListener('load', (event) => {
 		fullToHalf[value] = key;
 	}
 	inputText.addEventListener('change', (event) => {
+		console.log(checkWidth(input.value));
 		widthSelector.value = checkWidth(input.value);
 		output.value = '';
 	});
