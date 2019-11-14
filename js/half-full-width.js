@@ -1,9 +1,9 @@
-function checkWidth(outputText) {
+function checkWidth(inputText) {
 	const halfWidth = Object.keys(halfToFull);
 	const fullWidth = Object.values(halfToFull);
 	let half = 0;
 	let full = 0;
-	for (const char of InputText) {
+	for (const char of inputText) {
 		if (halfWidth.includes(char)) {
 			half += 1;
 		} else if (fullWidth.includes(char)) {
@@ -19,10 +19,10 @@ function checkWidth(outputText) {
 		return 'both';
 	}
 }
-function toHalfWidth(InputText) {
+function toHalfWidth(inputText) {
 	const fullWidth = Object.values(halfToFull);
 	let outputText = '';
-	for (const char of InputText) {
+	for (const char of inputText) {
 		if (fullWidth.includes(char)) {
 			outputText += fullToHalf[char];
 		} else {
@@ -31,10 +31,10 @@ function toHalfWidth(InputText) {
 	}
 	return outputText;
 }
-function toFullWidth(InputText) {
+function toFullWidth(inputText) {
 	const halfWidth = Object.keys(halfToFull);
 	let outputText = '';
-	for (const char of InputText) {
+	for (const char of inputText) {
 		if (halfWidth.includes(char)) {
 			outputText += halfToFull[char];
 		} else {
@@ -43,11 +43,11 @@ function toFullWidth(InputText) {
 	}
 	return outputText;
 }
-function invertWidth(InputText) {
+function invertWidth(inputText) {
 	const halfWidth = Object.keys(halfToFull);
 	const fullWidth = Object.values(halfToFull);
 	let outputText = '';
-	for (const char of InputText) {
+	for (const char of inputText) {
 		if (halfWidth.includes(char)) {
 			outputText += halfToFull[char];
 		} else if (fullWidth.includes(char)) {
