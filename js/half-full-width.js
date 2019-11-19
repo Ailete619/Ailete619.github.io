@@ -356,8 +356,9 @@ window.addEventListener('load', (event) => {
 	 * <h1></h1>
 	 */
 	fromClipboard.addEventListener('click', (event) => {
-		input.focus();
-		document.execCommand('paste');
+		navigator.clipboard
+			.readText()
+			.then((pasteText) => (input.value = pasteText));
 	});
 	/**
 	 * <h1></h1>
