@@ -1,5 +1,29 @@
-header,
-footer {
-    background-color: #0080ff;
-    color: #ffffff;
+html,
+body {
+	background-color: #ffffff;
+	font-family: 'Courier New', Courier, monospace;
+	height: 100%;
+	min-height: 100%;
+}
+body {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+main {
+	flex-grow: 21;
+}
+button,
+footer,
+header {
+	background-color: #0080ff;
+	color: #ffffff;
+}
+button {
+	border: none;
+	border-radius: 0.33em;
+	font-weight: bolder;
+}
+header h1 {
+	display: inline-block;
 }

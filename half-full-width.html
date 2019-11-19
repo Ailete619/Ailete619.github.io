@@ -10,6 +10,44 @@
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 		<link rel="stylesheet" href="css/styles.css?v=1.0" />
 		<script src="/js/half-full-width.js"></script>
+		<style>
+			ul {
+				align-items: stretch;
+				display: flex;
+				flex-direction: column;
+				height: 100%;
+				list-style: none;
+				margin: 0 1em;
+				padding: 0;
+			}
+			ul > li {
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				margin: 0;
+				padding: 0.33em 0;
+			}
+			ul > li > label {
+				display: inline-block;
+				vertical-align: top;
+				width: 4em;
+			}
+			ul > li:nth-child(2),
+			ul > li:nth-child(4) {
+				flex-grow: 2;
+			}
+			ul > li > textarea {
+				flex-grow: 2;
+				height: 100%;
+			}
+			ul > li > div {
+				display: flex;
+				flex-direction: row;
+				flex-grow: 2;
+				justify-content: center;
+				margin-right: 7em;
+			}
+		</style>
 	</head>
 	<body>
 		<header>
@@ -17,15 +55,33 @@
 			<h1>Aileté 619</h1>
 		</header>
 		<main>
-			<div>
-				<textarea id="inputText"></textarea>
-				<select id="widthSelector">
-					<option value=""></option>
-					<option value="half">半角</option>
-					<option value="full">全角</option>
-				</select>
-				<textarea id="outputText"></textarea>
-			</div>
+			<ul>
+				<li>
+					<button id="fromClipboard">📋 Paste from clipboard 📋</button>
+				</li>
+				<li>
+					<label for="inputText">Input</label>
+					<textarea id="inputText"></textarea>
+				</li>
+				<li>
+					<label for="widthSelector">Width</label>
+					<select id="widthSelector">
+						<option value=""></option>
+						<option value="half">半角</option>
+						<option value="full">全角</option>
+					</select>
+					<div>
+						<button id="outputToInput">↑ Copy output to input ↑</button>
+					</div>
+				</li>
+				<li>
+					<label for="outputText">Output</label>
+					<textarea id="outputText"></textarea>
+				</li>
+				<li>
+					<button id="toClipboard">📋 Copy to clipboard 📋</button>
+				</li>
+			</ul>
 		</main>
 		<footer>
 			Aileté 619
