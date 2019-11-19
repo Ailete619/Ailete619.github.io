@@ -353,12 +353,13 @@ window.addEventListener('load', (event) => {
 		fullToHalf[value] = key;
 	}
 	/**
-	 * <h1></h1>
+	 * <h1>Paste the clipboard content in the input field</h1>
 	 */
 	fromClipboard.addEventListener('click', (event) => {
-		navigator.clipboard
-			.readText()
-			.then((pasteText) => (input.value = pasteText));
+		navigator.clipboard.readText().then((pasteText) => {
+			input.value = pasteText;
+			console.log(pasteText);
+		});
 	});
 	/**
 	 * <h1></h1>
@@ -400,13 +401,13 @@ window.addEventListener('load', (event) => {
 		}
 	});
 	/**
-	 * <h1></h1>
+	 * <h1>Copy the output text in the input field</h1>
 	 */
 	outputToInput.addEventListener('click', (event) => {
 		input.value = output.value;
 	});
 	/**
-	 * <h1></h1>
+	 * <h1>Copy the output text to the clipboard</h1>
 	 */
 	toClipboard.addEventListener('click', (event) => {
 		output.select();
