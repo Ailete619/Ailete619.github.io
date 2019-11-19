@@ -358,7 +358,6 @@ window.addEventListener('load', (event) => {
 	fromClipboard.addEventListener('click', (event) => {
 		navigator.clipboard.readText().then((pasteText) => {
 			input.value = pasteText;
-			console.log(pasteText);
 		});
 	});
 	/**
