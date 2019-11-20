@@ -1,4 +1,12 @@
+'use strict';
+
+/**
+ * <h1></h1>
+ *
+ * @param {*} string
+ */
 function checkCase(string) {
+	// Check the characters and cases contained in the source string
 	let spaces = false;
 	let dashes = false;
 	let underscores = false;
@@ -87,6 +95,7 @@ function checkCase(string) {
 			default:
 		}
 	}
+	// Define the reference case characteristics
 	const allCapsCase = JSON.stringify([true, true, false, false, true, false]);
 	const allCapsKebabCase = JSON.stringify([
 		true,
@@ -109,7 +118,7 @@ function checkCase(string) {
 	const noCase = JSON.stringify([false, true, false, false, false, true]);
 	const pascalCase = JSON.stringify([true, false, false, false, true, true]);
 	const snakeCase = JSON.stringify([false, false, false, true, false, true]);
-
+	// Define the source string case characteristics
 	const stringCase = JSON.stringify([
 		uppercaseStart,
 		spaces,
@@ -118,30 +127,40 @@ function checkCase(string) {
 		uppercases,
 		lowercases,
 	]);
+	// Determine which case the source string matches
 	let caseName = 'none';
 	switch (stringCase) {
-		case pascalCase:
-			caseName = 'pascal';
+		case allCapsCase:
+			caseName = 'all caps';
 			break;
-		case camelCase:
-			caseName = 'camel';
-			break;
-		case snakeCase:
-			caseName = 'snake';
+		case allCapsKebabCase:
+			caseName = 'all caps kebab';
 			break;
 		case allCapsSnakeCase:
 			caseName = 'all caps snake';
 			break;
+		case camelCase:
+			caseName = 'camel';
+			break;
 		case kebabCase:
 			caseName = 'kebab';
 			break;
-		case allCapsKebabCase:
-			caseName = 'all caps kebab';
+		case noCase:
+			caseName = 'none';
+			break;
+		case pascalCase:
+			caseName = 'pascal';
+			break;
+		case snakeCase:
+			caseName = 'snake';
 			break;
 		default:
 	}
 	return caseName;
 }
+/*
+ * The dictionary of conversion functions from a character case to no character case
+ */
 const From = {
 	'all caps ': function(string) {
 		const list = string.split(' ');
@@ -175,6 +194,9 @@ const From = {
 		return string.split('_');
 	},
 };
+/*
+ * The dictionary of conversion functions from no character case to a particular character case
+ */
 const To = {
 	'all caps': function(list) {
 		const processedList = list.map((x) => x.toUpperCase());
@@ -213,17 +235,61 @@ const To = {
 		return list.join('_');
 	},
 };
+/*
+ * The load event listener
+ */
 window.addEventListener('load', (event) => {
+	/*
+	 * UI elements
+	 */
+	const fromClipboard = document.getElementById('fromClipboard');
 	const input = document.getElementById('inputString');
 	const caseSelector = document.getElementById('caseSelector');
+	const outputToInput = document.getElementById('outputToInput');
 	const output = document.getElementById('outputString');
+	const toClipboard = document.getElementById('toClipboard');
+	/**
+	 * <h1>Paste the clipboard content in the input field</h1>
+	 */
+	fromClipboard.addEventListener('click', (event) => {
+		navigator.clipboard.readText().then((pasteText) => {
+			// Paste
+			input.value = pasteText;
+			// Create and dispatch a change event
+			var event = new Event('change');
+			input.dispatchEvent(event);
+		});
+	});
+	/**
+	 * <h1>Update the character case in the selector when the source string changes</h1>
+	 */
 	input.addEventListener('change', (event) => {
 		caseSelector.value = checkCase(input.value);
 		output.value = '';
 	});
+	/**
+	 * <h1>Convert the source string when the selected character width changes</h1>
+	 */
 	caseSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkCase(inputValue);
 		output.value = To[caseSelector.value](From[inputFormat](inputValue));
+	});
+	/**
+	 * <h1>Copy the output string in the input field</h1>
+	 */
+	outputToInput.addEventListener('click', (event) => {
+		// Copy
+		input.value = output.value;
+		// Create and dispatch a change event
+		var event = new Event('change');
+		input.dispatchEvent(event);
+	});
+	/**
+	 * <h1>Copy the output string to the clipboard</h1>
+	 */
+	toClipboard.addEventListener('click', (event) => {
+		output.select();
+		document.execCommand('copy');
 	});
 });

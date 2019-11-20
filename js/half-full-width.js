@@ -113,7 +113,7 @@ function invertWidth(inputText) {
 	return outputText;
 }
 /*
- * the half-width to full-width dictionary
+ * The half-width to full-width dictionary
  */
 const halfToFull = {
 	' ': '　',
@@ -316,13 +316,13 @@ const halfToFull = {
 	'￮': '○',
 };
 /*
- *  the full-width to half-width dictionary
+ *  The full-width to half-width dictionary
  *
  *  the dictionary is filled with the data from the half-width to full-width dictionary
  */
 const fullToHalf = {};
 /*
- * the load event listener
+ * The load event listener
  */
 window.addEventListener('load', (event) => {
 	/*
@@ -357,14 +357,15 @@ window.addEventListener('load', (event) => {
 	 */
 	fromClipboard.addEventListener('click', (event) => {
 		navigator.clipboard.readText().then((pasteText) => {
+			// Paste
 			input.value = pasteText;
-			// Create and dispatch change event
+			// Create and dispatch a change event
 			var event = new Event('change');
 			input.dispatchEvent(event);
 		});
 	});
 	/**
-	 * <h1></h1>
+	 * <h1>Update the character width in the selector when the source text changes</h1>
 	 */
 	inputText.addEventListener('change', (event) => {
 		// get the type of the souce text
@@ -384,11 +385,10 @@ window.addEventListener('load', (event) => {
 		output.value = '';
 	});
 	/**
-	 *
+	 * <h1>Convert the source text when the selected character width changes</h1>
 	 */
 	widthSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
-		const inputFormat = checkWidth(inputValue);
 		switch (widthSelector.value) {
 			case 'half':
 				output.value = toHalfWidth(inputValue);
@@ -406,8 +406,9 @@ window.addEventListener('load', (event) => {
 	 * <h1>Copy the output text in the input field</h1>
 	 */
 	outputToInput.addEventListener('click', (event) => {
+		// Copy
 		input.value = output.value;
-		// Create and dispatch change event
+		// Create and dispatch a change event
 		var event = new Event('change');
 		input.dispatchEvent(event);
 	});

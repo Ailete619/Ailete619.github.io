@@ -19,25 +19,34 @@
 		<main>
 			<ul>
 				<li>
-					<label>Input <input id="inputString" type="text"/></label>
+					<button id="fromClipboard">📋 Paste from clipboard 📋</button>
 				</li>
 				<li>
-					<label
-						>Case
-						<select id="caseSelector">
-							<option value="none">None</option>
-							<option value="all caps">All caps</option>
-							<option value="all caps kebab">All caps Kebab</option>
-							<option value="all caps snake">All caps Snake</option>
-							<option value="camel">Camel</option>
-							<option value="kebab">Kebab</option>
-							<option value="pascal">Pascal</option>
-							<option value="snake">Snake</option>
-						</select>
-					</label>
+					<label for="inputString">Input</label>
+					<input id="inputString" type="text" />
 				</li>
 				<li>
-					<label>Output <input id="outputString" type="text"/></label>
+					<label for="caseSelector">Case</label>
+					<select id="caseSelector">
+						<option value="none">None</option>
+						<option value="all caps">All caps</option>
+						<option value="all caps kebab">All caps Kebab</option>
+						<option value="all caps snake">All caps Snake</option>
+						<option value="camel">Camel</option>
+						<option value="kebab">Kebab</option>
+						<option value="pascal">Pascal</option>
+						<option value="snake">Snake</option>
+					</select>
+					<div>
+						<button id="outputToInput">↑ Copy output to input ↑</button>
+					</div>
+				</li>
+				<li>
+					<label for="outputString">Output</label>
+					<input id="outputString" type="text" />
+				</li>
+				<li>
+					<button id="toClipboard">📋 Copy to clipboard 📋</button>
 				</li>
 			</ul>
 		</main>
