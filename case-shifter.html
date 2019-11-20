@@ -10,6 +10,53 @@
 		<link rel="shortcut icon" type="image/x-icon" href="/img/favicon.ico" />
 		<link rel="stylesheet" href="css/styles.css?v=1.0" />
 		<script src="/js/case-shifter.js"></script>
+		<style>
+			ul {
+				align-items: stretch;
+				display: flex;
+				flex-direction: column;
+				height: 100%;
+				list-style: none;
+				margin: 0 1em;
+				padding: 0;
+			}
+
+			ul > li {
+				display: flex;
+				flex-direction: row;
+				justify-content: center;
+				margin: 0;
+				padding: 0.33em 0;
+			}
+
+			ul > li > label {
+				display: inline-block;
+				vertical-align: top;
+				width: 4em;
+			}
+
+			ul > li > select {
+				width: 6em;
+			}
+
+			ul > li:nth-child(2),
+			ul > li:nth-child(4) {
+				flex-grow: 2;
+			}
+
+			ul > li > textarea {
+				flex-grow: 2;
+				height: 100%;
+			}
+
+			ul > li > div {
+				display: flex;
+				flex-direction: row;
+				flex-grow: 2;
+				justify-content: center;
+				margin-right: 8em;
+			}
+		</style>
 	</head>
 	<body>
 		<header>
