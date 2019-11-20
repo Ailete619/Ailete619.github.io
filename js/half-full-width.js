@@ -358,6 +358,9 @@ window.addEventListener('load', (event) => {
 	fromClipboard.addEventListener('click', (event) => {
 		navigator.clipboard.readText().then((pasteText) => {
 			input.value = pasteText;
+			// Create and dispatch change event
+			var event = new Event('change');
+			input.dispatchEvent(event);
 		});
 	});
 	/**
@@ -404,6 +407,9 @@ window.addEventListener('load', (event) => {
 	 */
 	outputToInput.addEventListener('click', (event) => {
 		input.value = output.value;
+		// Create and dispatch change event
+		var event = new Event('change');
+		input.dispatchEvent(event);
 	});
 	/**
 	 * <h1>Copy the output text to the clipboard</h1>
