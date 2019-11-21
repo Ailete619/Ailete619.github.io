@@ -168,7 +168,7 @@ const From = {
 	'all caps kebab': function(string) {
 		return string.toLowerCase().split('-');
 	},
-	'all caps snake': function() {
+	'all caps snake': function(string) {
 		return string.toLowerCase().split('_');
 	},
 	camel: function(string) {
