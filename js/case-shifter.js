@@ -277,7 +277,17 @@ window.addEventListener('load', (event) => {
 			inputFormat,
 			'](',
 			inputValue,
-			'))',
+			')) From[',
+			inputFormat,
+			']=',
+			From[inputFormat],
+			' From[',
+			inputFormat,
+			'](',
+			inputValue,
+			')=',
+			From[inputFormat](inputValue),
+			'',
 		);
 		output.value = To[caseSelector.value](From[inputFormat](inputValue));
 	});
