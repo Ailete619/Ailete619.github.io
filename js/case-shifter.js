@@ -270,6 +270,15 @@ window.addEventListener('load', (event) => {
 	caseSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkCase(inputValue);
+		console.log(
+			'To[',
+			caseSelector.value,
+			'](From[',
+			inputFormat,
+			'](',
+			inputValue,
+			'))',
+		);
 		output.value = To[caseSelector.value](From[inputFormat](inputValue));
 	});
 	/**
