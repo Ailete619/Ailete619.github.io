@@ -162,7 +162,7 @@ function checkCase(string) {
  * The dictionary of conversion functions from a character case to no character case
  */
 const From = {
-	'all caps ': function(string) {
+	'all caps': function(string) {
 		return string.toLowerCase().split(' ');
 	},
 	'all caps kebab': function(string) {
@@ -270,15 +270,6 @@ window.addEventListener('load', (event) => {
 	caseSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkCase(inputValue);
-		console.log(
-			'To[',
-			caseSelector.value,
-			'](From[',
-			inputFormat,
-			'](',
-			inputValue,
-			'))',
-		);
 		output.value = To[caseSelector.value](From[inputFormat](inputValue));
 	});
 	/**
