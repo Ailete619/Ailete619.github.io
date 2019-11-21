@@ -163,16 +163,13 @@ function checkCase(string) {
  */
 const From = {
 	'all caps ': function(string) {
-		const list = string.split(' ');
-		return list.map((x) => x.toLowerCase());
+		return string.toLowerCase().split(' ');
 	},
 	'all caps kebab': function(string) {
-		const list = string.split('-');
-		return list.map((x) => x.toLowerCase());
+		return string.toLowerCase().split('-');
 	},
 	'all caps snake': function() {
-		const list = string.split('_');
-		return list.map((x) => x.toLowerCase());
+		return string.toLowerCase().split('_');
 	},
 	camel: function(string) {
 		return [...string.matchAll(/([a-z]+)|([A-Z][a-z]*)/gm)].map((x) =>
@@ -273,6 +270,15 @@ window.addEventListener('load', (event) => {
 	caseSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkCase(inputValue);
+		console.log(
+			'To[',
+			caseSelector.value,
+			'](From[',
+			inputFormat,
+			'](',
+			inputValue,
+			'))',
+		);
 		output.value = To[caseSelector.value](From[inputFormat](inputValue));
 	});
 	/**
