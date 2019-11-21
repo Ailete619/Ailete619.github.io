@@ -270,26 +270,9 @@ window.addEventListener('load', (event) => {
 	caseSelector.addEventListener('change', (event) => {
 		const inputValue = input.value;
 		const inputFormat = checkCase(inputValue);
-		console.log(
-			'To[',
-			caseSelector.value,
-			'](From[',
-			inputFormat,
-			'](',
-			inputValue,
-			')) From[',
-			inputFormat,
-			']=',
-			From[inputFormat],
-			' From[',
-			inputFormat,
-			'](',
-			inputValue,
-			')=',
-			From[inputFormat](inputValue),
-			'',
-		);
-		output.value = To[caseSelector.value](From[inputFormat](inputValue));
+		const fromInput = From[inputFormat];
+		const intermediateForm = fromInput(inputValue);
+		output.value = To[caseSelector.value](intermediateForm);
 	});
 	/**
 	 * <h1>Copy the output string in the input field</h1>
