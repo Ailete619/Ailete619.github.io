@@ -1,0 +1,503 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>Regex Explorer</title>
+		<style></style>
+		<script type="text/javascript" src="/js/vis-network.min.js"></script>
+		<script>
+			class State {
+				static nextId() {
+					this._id = (this._id || 0) + 1;
+					return this._id;
+				}
+				static resetId(id) {
+					if (id) {
+						if (id === this._id && id > 0) {
+							this._id = this._id - 1;
+						}
+					} else {
+						this._id = undefined;
+					}
+				}
+
+				constructor(accepting = false) {
+					this.accepting = accepting;
+					this.transitionMap = new Map();
+					this.epsilonTransitions = new Array();
+					this.id = State.nextId();
+				}
+				addEpsilonTransition(state) {
+					this.epsilonTransitions.push(state);
+				}
+				addTransitionForSymbol(symbol, state) {
+					let transitions = this.transitionMap.get(symbol);
+					if (!transitions) {
+						transitions = new Array();
+						this.transitionMap.set(symbol, transitions);
+					}
+					transitions.push(state);
+				}
+				getEpsilonClosure() {
+					const closure = new Set([this]);
+					const toVisit = new Set([...this.getEpsilonTransitions()]);
+					while (toVisit.size > 0) {
+						const nextState = toVisit.values().next().value;
+						closure.add(nextState);
+						toVisit.delete(nextState);
+						for (const epsilonState of nextState.getEpsilonTransitions()) {
+							if (!closure.has(epsilonState)) {
+								toVisit.add(epsilonState);
+							}
+						}
+					}
+					return [...closure.values()];
+				}
+				getEpsilonTransitions() {
+					return this.epsilonTransitions;
+				}
+				getTransitionsForSymbol(symbol) {
+					return this.transitionMap.get(symbol);
+				}
+				test(string, visited = new Set()) {
+					if (visited.has(this)) {
+						return false;
+					}
+					visited.add(this);
+					if (string.length === 0) {
+						if (this.accepting) {
+							return true;
+						}
+						for (const nextState of this.getEpsilonTransitions()) {
+							if (nextState.test('', visited)) {
+								return true;
+							}
+						}
+						return false;
+					}
+					const symbol = string[0];
+					const rest = string.slice(1);
+					for (const nextState of this.getTransitionsForSymbol(symbol) || []) {
+						if (nextState.test(rest)) {
+							return true;
+						}
+					}
+					for (const nextState of this.getEpsilonTransitions()) {
+						if (nextState.test(string, visited)) {
+							return true;
+						}
+					}
+					return false;
+				}
+			}
+			class NFA {
+				constructor(inState, outState) {
+					this.inState = inState;
+					this.outState = outState;
+				}
+				getAlphabet() {
+					const alphabet = new Set();
+					const visited = new Set();
+					const toVisit = new Set();
+					toVisit.add(this.inState);
+					while (toVisit.size > 0) {
+						const state = toVisit.values().next().value;
+						visited.add(state);
+						toVisit.delete(state);
+						for (const nextState of state.getEpsilonTransitions()) {
+							if (!visited.has(nextState)) {
+								toVisit.add(nextState);
+							}
+						}
+						for (const symbolEntry of state.transitionMap.entries()) {
+							alphabet.add(symbolEntry[0]);
+							symbolEntry[1].forEach((nextState) => {
+								if (!visited.has(nextState)) {
+									toVisit.add(nextState);
+								}
+							});
+						}
+					}
+					return alphabet;
+				}
+				getTransitionTable() {
+					const visited = new Set();
+					const toVisit = new Set();
+					const table = {
+						headers: [...this.getAlphabet().values()],
+						rows: new Array(State._id + 1),
+					};
+					toVisit.add(this.inState);
+					while (toVisit.size > 0) {
+						const state = toVisit.values().next().value;
+						visited.add(state.id);
+						toVisit.delete(state);
+						const row = {
+							header: state,
+							columns: new Array(table.headers.size),
+							epsilon: state.getEpsilonClosure(),
+						};
+						row.epsilon.forEach((nextState) => {
+							if (!visited.has(nextState.id)) {
+								toVisit.add(nextState);
+							}
+						});
+
+						if (table.rows[0]) {
+							table.rows[state.id] = row;
+						} else {
+							table.rows[0] = row;
+						}
+						let index = 0;
+						for (const symbol of table.headers) {
+							const transitions = state.getTransitionsForSymbol(symbol);
+							if (transitions) {
+								transitions.forEach((nextState) => {
+									if (!visited.has(nextState.id)) {
+										toVisit.add(nextState);
+									}
+								});
+							}
+							row.columns[index++] = transitions;
+						}
+					}
+					return table;
+				}
+
+				test(string) {
+					return this.inState.test(string);
+				}
+				renderNetworkGraph() {
+					// create an array with nodes
+					var nodes = new vis.DataSet([
+						{ id: 1, label: 'Node 1' },
+						{ id: 2, label: 'Node 2' },
+						{ id: 3, label: 'Node 3' },
+						{ id: 4, label: 'Node 4' },
+						{ id: 5, label: 'Node 5' },
+					]);
+
+					// create an array with edges
+					var edges = new vis.DataSet([
+						{ from: 1, to: 3 },
+						{ from: 1, to: 2 },
+						{ from: 2, to: 4 },
+						{ from: 2, to: 5 },
+					]);
+
+					// create a network
+					var container = document.getElementById('nfaNetwork');
+
+					// provide the data in the vis format
+					var data = {
+						nodes: nodes,
+						edges: edges,
+					};
+					var options = {};
+
+					// initialize your network!
+					var network = new vis.Network(container, data, options);
+				}
+			}
+			function char(symbol) {
+				const inState = new State();
+				const outState = new State(true);
+				inState.addTransitionForSymbol(symbol, outState);
+				return new NFA(inState, outState);
+			}
+			function epsilon() {
+				const inState = new State();
+				const outState = new State(true);
+				inState.addEpsilonTransition(outState);
+				return new NFA(inState, outState);
+			}
+			function concatPair(first, second) {
+				first.outState.accepting = false;
+				second.outState.accepting = true;
+				first.outState.addEpsilonTransition(second.inState);
+				return new NFA(first.inState, second.outState);
+			}
+			function concat(head, tail) {
+				console.log('concat', head, tail);
+				for (let fragment of tail) {
+					head = concatPair(head, fragment);
+				}
+				return head;
+			}
+			function orPair(first, second) {
+				const inState = new State();
+				const outState = new State(true);
+				first.outState.accepting = false;
+				second.outState.accepting = false;
+				inState.addEpsilonTransition(first.inState);
+				inState.addEpsilonTransition(second.inState);
+				first.outState.addEpsilonTransition(outState);
+				second.outState.addEpsilonTransition(outState);
+				return new NFA(inState, outState);
+			}
+			function or(head, tail) {
+				console.log('or', head, tail);
+				for (let fragment of tail) {
+					head = orPair(head, fragment);
+				}
+				return head;
+			}
+			function rep(fragment) {
+				const inState = new State();
+				const outState = new State(true);
+				fragment.outState.accepting = false;
+				inState.addEpsilonTransition(fragment.inState);
+				inState.addEpsilonTransition(outState);
+				fragment.outState.addEpsilonTransition(outState);
+				outState.addEpsilonTransition(fragment.inState);
+				return new NFA(inState, outState);
+			}
+			class DFA {
+				constructor(nfa) {
+					const nfaTable = nfa.getTransitionTable();
+					State.resetId();
+					const stateNameTable = new Map();
+					const stateCheckTable = new Map();
+					function isAccepting(stateIdList) {
+						return (
+							stateIdList.find((id) => {
+								if (!nfaTable.rows[id]) {
+									id = 0;
+								}
+								return nfaTable.rows[id].header.accepting;
+							}) > -1
+						);
+					}
+					function getTransitionsEpsilonClosure(stateIdList) {
+						const stateName = JSON.stringify(stateIdList.sort());
+						if (stateNameTable.has(stateName)) {
+							return stateNameTable.get(stateName);
+						} else {
+							const state = new State();
+							state.name = stateName;
+							stateNameTable.set(stateName, state);
+							nfaTable.headers.forEach((symbol, colIndex) => {
+								const closure = new Set();
+								stateIdList.forEach((id) => {
+									if (!nfaTable.rows[id]) {
+										id = 0;
+									}
+									const stateList = nfaTable.rows[id].columns[colIndex];
+									if (stateList) {
+										stateList.forEach((state) => {
+											state.getEpsilonClosure().forEach((state) => {
+												closure.add(state.id);
+											});
+										});
+									}
+								});
+								if (closure.size > 0) {
+									state.addTransitionForSymbol(
+										symbol,
+										getTransitionsEpsilonClosure([...closure.values()]),
+									);
+								}
+							});
+							state.accepting = isAccepting(stateIdList);
+							if (!state.accepting && state.transitionMap.size === 0) {
+								State.resetId();
+								return getTransitionsEpsilonClosure(
+									nfaTable.rows[0].epsilon
+										.filter((state) => state !== undefined)
+										.map((state) => state.id),
+								);
+							} else {
+								const transitions = {};
+								for (const entry of state.transitionMap.entries()) {
+									transitions[entry[0]] = entry[1][0].name;
+								}
+								const stateCheckString = JSON.stringify([
+									state.accepting,
+									transitions,
+								]);
+								if (stateCheckTable.has(stateCheckString)) {
+									stateNameTable.delete(stateName);
+									return stateCheckTable.get(stateCheckString);
+								} else {
+									stateCheckTable.set(stateCheckString, state);
+									return state;
+								}
+							}
+						}
+					}
+					console.log('0');
+					this.inState = getTransitionsEpsilonClosure([0]);
+					this.outState = stateCheckTable.get('[true,{}]');
+				}
+				test(string) {
+					let state = this.inState;
+					console.log(state);
+					let index = 0;
+					while (string[index] != undefined) {
+						console.log(
+							'string[',
+							index,
+							']=',
+							string[index],
+							';\n ',
+							state,
+							'.getTransitionsForSymbol(string[',
+							index,
+							' ]:',
+							string[index],
+							')=',
+							state.getTransitionsForSymbol(string[index + 1]),
+						);
+						state = state.getTransitionsForSymbol(string[index++]);
+						if (state == undefined) {
+							return false;
+						} else {
+							state = state[0];
+						}
+					}
+					return state.accepting;
+				}
+			}
+			class RegexTokenizer {
+				constructor() {
+					this.regexString = '';
+					this.index = 0;
+				}
+				setRegex(string) {
+					this.regexString = string;
+					this.index = 0;
+				}
+				isCharacter(character) {
+					const regex = RegExp('[^*|]');
+					return regex.test(character);
+				}
+				next() {
+					const currentChar = this.regexString[this.index++];
+					if (currentChar == undefined) {
+						return undefined;
+					} else if (this.isCharacter(currentChar)) {
+						return { type: 'char', value: currentChar };
+					} else {
+						switch (currentChar) {
+							case '*':
+								return { type: 'rep', value: currentChar };
+							case '+':
+								return { type: 'rep', value: currentChar };
+							case '?':
+								return { type: 'rep', value: currentChar };
+							case '|':
+								return { type: 'or', value: currentChar };
+							default:
+								return { type: 'error', value: currentChar };
+						}
+					}
+				}
+			}
+			class RegexParser {
+				constructor() {
+					this.tokenizer = new RegexTokenizer();
+					this.currentToken = null;
+					this.currentNFA = null;
+				}
+				repExpr() {
+					console.log('repExpr');
+					const repList = [];
+					while (this.currentToken && this.currentToken.type === 'char') {
+						let lastNFA = char(this.currentToken.value);
+						this.currentToken = this.tokenizer.next();
+						while (this.currentToken && this.currentToken.type === 'rep') {
+							this.currentToken = this.tokenizer.next();
+							lastNFA = rep(lastNFA);
+						}
+						repList.push(lastNFA);
+					}
+					if (repList.length > 0) {
+						return repList;
+					}
+				}
+				concatExpr() {
+					console.log('concatExpr');
+					const repList = this.repExpr();
+					console.log(repList);
+					if (repList) {
+						if (repList == 1) {
+							return repList;
+						} else {
+							return concat(repList[0], repList.slice(1));
+						}
+					}
+				}
+				orExpr() {
+					console.log('orExpr');
+					const firstConcat = this.concatExpr();
+					console.log('firstConcat', firstConcat);
+					const concatList = [];
+					while (this.currentToken && this.currentToken.type === 'or') {
+						this.currentToken = this.tokenizer.next();
+						concatList.push(this.concatExpr());
+					}
+					if (concatList.length > 0) {
+						return or(firstConcat, concatList);
+					} else {
+						return firstConcat;
+					}
+				}
+				parse(string) {
+					this.tokenizer.setRegex(string);
+					this.currentToken = this.tokenizer.next();
+					this.currentNFA = null;
+
+					return this.orExpr();
+				}
+			}
+		</script>
+	</head>
+	<body>
+		<header></header>
+		<main>
+			<input id="regexInput" />
+			<textarea id="input"></textarea>
+			<button>check</button>
+			<div id="nfaNetwork"></div>
+			<div id="nfaTransitionTable"></div>
+			<div id="dfaNetwork"></div>
+			<textarea id="output"></textarea>
+		</main>
+		<footer></footer>
+		<script type="text/javascript">
+			window.addEventListener('load', () => {
+				// create an array with nodes
+				var nodes = new vis.DataSet([
+					{ id: 1, label: 'Node 1' },
+					{ id: 2, label: 'Node 2' },
+					{ id: 3, label: 'Node 3' },
+					{ id: 4, label: 'Node 4' },
+					{ id: 5, label: 'Node 5' },
+				]);
+
+				// create an array with edges
+				var edges = new vis.DataSet([
+					{ from: 1, to: 3 },
+					{ from: 1, to: 2 },
+					{ from: 2, to: 4 },
+					{ from: 2, to: 5 },
+				]);
+
+				// create a network
+				var container = document.getElementById('nfaNetwork');
+
+				// provide the data in the vis format
+				var data = {
+					nodes: nodes,
+					edges: edges,
+				};
+				var options = {};
+
+				// initialize your network!
+				var network = new vis.Network(container, data, options);
+			});
+		</script>
+	</body>
+</html>

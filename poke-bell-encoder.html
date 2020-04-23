@@ -9,7 +9,7 @@
 		<title>Aileté 619</title>
 		<link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
 		<link rel="stylesheet" href="css/styles.css?v=1.0" />
-		<script src="/js/half-full-width.js"></script>
+		<script src="/js/poke-bell-encoder.js"></script>
 	</head>
 	<body>
 		<header>
@@ -17,15 +17,30 @@
 			<h1>Aileté 619</h1>
 		</header>
 		<main>
-			<div>
-				<textarea id="inputText"></textarea>
-				<select id="widthSelector">
-					<option value=""></option>
-					<option value="half"> <半角</option>
-					<option value="full">全角 </option>
-				</select>
-				<textarea id="outputText"></textarea>
-			</div>
+			<ul>
+				<li>
+					<button id="fromClipboard">📋 Paste from clipboard 📋</button>
+				</li>
+				<li>
+					<label for="inputString">Input</label>
+					<input id="inputString" type="text" />
+				</li>
+				<li>
+					<div>
+						<button id="encodeInput">↓ Encode input ↓</button>
+					</div>
+					<div>
+						<button id="outputToInput">↑ Copy output to input ↑</button>
+					</div>
+				</li>
+				<li>
+					<label for="outputString">Output</label>
+					<input id="outputString" type="text" />
+				</li>
+				<li>
+					<button id="toClipboard">📋 Copy to clipboard 📋</button>
+				</li>
+			</ul>
 		</main>
 		<footer>
 			Aileté 619

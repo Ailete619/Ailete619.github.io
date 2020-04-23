@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="x-ua-compatible" content="ie=edge" />
+		<meta name="viewport" content="width=device-width,initial-scale=1" />
+		<title>NFA</title>
+		<style></style>
+		<script>
+			const freeze = (obj) => Object.freeze(obj);
+
+			function enumeration(...members) {
+				let memberValues = {};
+				for (member of members) {
+					// we're only supporting string or object arguments
+					if (typeof member === 'string') {
+						memberValues[member] = freeze({ value: member });
+					} else if (typeof member === 'object') {
+						// use the first provided key to support { key: value } usage
+						const key = Object.keys(member)[0];
+						memberValues[key] = freeze({ value: member[key] });
+					}
+				}
+				return freeze(memberValues);
+			}
+
+			const RegexTokens = enumeration(
+				{ any: '.' },
+				'charGroup',
+				'concatenation',
+				{ end: '$' },
+				'EOL',
+				{ groupEnd: ')' },
+				{ groupStart: '(' },
+				'notCharGroup',
+				{ oneOrMore: '+' },
+				{ start: '^' },
+				'string',
+				'symbol',
+				{ union: '|' },
+				{ zeroOrMore: '*' },
+				{ zeroOrOne: '?' },
+			);
+			class RegExLexer {
+				constructor(regexString) {
+					this.currentChar = regexString[0];
+					this.position = 0;
+					this.regexString = regexString;
+				}
+				consume(char) {
+					if (this.currentChar !== char) {
+						this.error("'" + char + "' expected!");
+					}
+					this.nextChar();
+				}
+				error(additionalMessage = null) {
+					let errorMessage =
+						"Invalid character '" +
+						this.currentCharacter +
+						"' at position " +
+						this.position;
+					if (additionalMessage) {
+						errorMessage += ': ' + additionalMessage;
+					}
+					errorMessage += '!';
+					throw new Error(messageText);
+				}
+				escapeCharacter() {
+					this.consume('\\');
+					escapedChar = null;
+					switch (this.currentChar) {
+						case '"':
+							escapedChar = '"';
+							break;
+						case '$':
+							escapedChar = '$';
+							break;
+						case "'":
+							escapedChar = "'";
+							break;
+						case '(':
+							escapedChar = '(';
+							break;
+						case ')':
+							escapedChar = ')';
+							break;
+						case '*':
+							escapedChar = '*';
+							break;
+						case '+':
+							escapedChar = '+';
+							break;
+						case '-':
+							escapedChar = '-';
+							break;
+						case '.':
+							escapedChar = '.';
+							break;
+						case '?':
+							escapedChar = '?';
+							break;
+						case '[':
+							escapedChar = '[';
+							break;
+						case '\\':
+							escapedChar = '\\';
+							break;
+						case ']':
+							escapedChar = ']';
+							break;
+						case '^':
+							escapedChar = '^';
+							break;
+						case '|':
+							escapedChar = 'd';
+							break;
+						case '|':
+							escapedChar = 'n';
+							break;
+						case '|':
+							escapedChar = 'r';
+							break;
+						case '|':
+							escapedChar = 's';
+							break;
+						case '|':
+							escapedChar = 't';
+							break;
+						case '|':
+							escapedChar = '|';
+							break;
+						default:
+							this.error('Unexpected character');
+					}
+					if (escapedChar) {
+						return { type: RegexTokens.symbol, value: escapedChar };
+					} else {
+						this.error('Error escaping character');
+					}
+				}
+				static isSymbol(char) {
+					if ('"$\'()*+-.?[\\]^|'.includes(char)) {
+						return false;
+					}
+					return true;
+				}
+				nextChar() {
+					this.position += 1;
+					if (this.position >= this.source.length) {
+						this.currentChar = null;
+					} else {
+						this.currentChar = this.source[this.position];
+					}
+				}
+				nextToken() {
+					if (RegExLexer.isSymbol(this.currentChar)) {
+						return { type: RegexTokens.symbol, value: this.currentChar };
+					}
+					switch (this.currentChar) {
+						case '"':
+							return this.string('"');
+							break;
+						case '$':
+							this.nextChar();
+							return { type: RegexTokens.end, value: RegexTokens.and.value };
+							break;
+						case "'":
+							return this.string("'");
+							break;
+						case '(':
+							this.nextChar();
+							return {
+								type: RegexTokens.groupStart,
+								value: RegexTokens.groupStart.value,
+							};
+							break;
+						case ')':
+							this.nextChar();
+							return {
+								type: RegexTokens.groupEnd,
+								value: RegexTokens.groupEnd.value,
+							};
+							break;
+						case '*':
+							this.nextChar();
+							return {
+								type: RegexTokens.zeroOrMore,
+								value: RegexTokens.zeroOrMore.value,
+							};
+							break;
+						case '+':
+							this.nextChar();
+							return {
+								type: RegexTokens.oneOrMore,
+								value: RegexTokens.oneOrMore.value,
+							};
+							break;
+						case '.':
+							this.nextChar();
+							return { type: RegexTokens.any, value: RegexTokens.any.value };
+							break;
+						case '?':
+							this.nextChar();
+							return {
+								type: RegexTokens.zeroOrOne,
+								value: RegexTokens.zeroOrOne.value,
+							};
+							break;
+						case '[':
+							return this.charGroup();
+							break;
+						case '\\':
+							return this.escapeCharacter();
+							break;
+						case '^':
+							this.nextChar();
+							return { type: RegexTokens.SOL, value: RegexTokens.SOL.value };
+							break;
+						case '|':
+							this.nextChar();
+							return {
+								type: RegexTokens.union,
+								value: RegexTokens.union.value,
+							};
+							break;
+						default:
+					}
+				}
+				peekChar(offset = 1) {
+					let peekPos = this.position + offset;
+					if (peekPos >= this.source.length) {
+						return null;
+					} else {
+						return this.source[peekPos];
+					}
+				}
+				charGroup() {
+					this.consume('[');
+					let charGroup = [];
+					let charGroupType = RegexTokens.charGroup;
+					if (this.currentChar === '^') {
+						this.nextChar();
+						charGroupType = RegexTokens.notCharGroup;
+					}
+					while (this.currentChar !== ']') {
+						let char = this.currentChar;
+						if (char === '-') {
+							this.error('Malformed range');
+						}
+						if (char === '\\') {
+							char = this.escapeCharacter();
+						}
+						if (this.peekChar() === '-') {
+							this.nextChar();
+							this.consume('-');
+							let nextChar = this.currentChar;
+							if ('-[]^'.includes(nextChar)) {
+								this.error('Malformed range');
+							}
+							if (nextChar === '\\') {
+								nextChar = this.escapeCharacter();
+							}
+							charGroup.push([char, nextChar]);
+						} else {
+							charGroup.push(this.currentChar);
+						}
+					}
+					this.consume(']');
+					return { type: charGroupType, value: charGroup };
+				}
+				string(quote) {
+					this.consume(quote);
+					let string = '';
+					while (this.currentChar !== quote) {
+						string += this.currentChar;
+					}
+					this.consume(quote);
+					return { type: RegexTokens.string, value: string };
+				}
+			}
+			class NFAState {
+				constructor(isAccepting) {
+					this.isAccepting = isAccepting;
+					this.transition = {};
+					this.epsilonTransitions = [];
+				}
+			}
+			class RegExParser {
+				constructor(regexString) {
+					this.lexer = new RegExLexer(regexString);
+					this.currentToken = this.lexer.nextToken();
+					const start = new NFAState(false);
+					const end = new NFAState(true);
+					addEpsilonTransition(start, end);
+					this.nfa = { start, end };
+				}
+				consume(tokenType) {
+					if (this.currentToken.type !== tokenType) {
+						this.error("'" + tokenType + "' expected!");
+					}
+					this.nextChar();
+				}
+				epsilonTransition(fromState, toState) {
+					fromState.epsilonTransitions.push(toState);
+				}
+				error(additionalMessage = null) {
+					let errorMessage =
+						"Invalid token '" +
+						this.currentToken.type +
+						"' at position " +
+						this.lexer.position;
+					if (additionalMessage) {
+						errorMessage += ': ' + additionalMessage;
+					}
+					errorMessage += '!';
+					throw new Error(messageText);
+				}
+				nextToken() {
+					this.currentToken = this.lexer.nextToken();
+				}
+				parse() {
+					switch (this.currentToken.type) {
+						case RegexTokens.symbol:
+							return this.symbol(this.currentToken.value);
+							break;
+						case RegexTokens.string:
+							return this.string(this.currentToken.value);
+							break;
+						default:
+							this.error('Unexpected token');
+					}
+					return nfa;
+				}
+				peekToken() {}
+				string(string) {
+					const start = this.nfa.end;
+					let currentEnd = null;
+					if (string) {
+						let currentState = start;
+						for (const symbol of string) {
+							currentEnd = new NFAState(false);
+							this.transition(currentStart, currentEnd, symbol);
+							currentStart = currentEnd;
+						}
+						currentEnd.isAccepting = true;
+					} else {
+						currentEnd = new NFAState(true);
+						this.epsilonTransition(currentStart, currentEnd, symbol);
+					}
+					return { start, currentEnd };
+				}
+				symbol(symbol) {
+					const start = this.nfa.end;
+					const end = new NFAState(true);
+					this.transition(start, end, symbol);
+					return { start, end };
+				}
+				transition(fromState, toState, symbol) {
+					fromState.transition[symbol] = toState;
+				}
+			}
+			function addEpsilonTransition(fromState, toState) {
+				fromState.epsilonTransitions.push(toState);
+			}
+			function addTransition(fromState, toState, symbol) {
+				fromState.transition[symbol] = toState;
+			}
+			function fromEpsilon() {
+				const start = new NFAState(false);
+				const end = new NFAState(true);
+				addEpsilonTransition(start, end);
+
+				return { start, end };
+			}
+			function fromSymbol(symbol) {
+				const start = new NFAState(false);
+				const end = new NFAState(true);
+				addTransition(start, end, symbol);
+
+				return { start, end };
+			}
+			function concat(first, second) {
+				addEpsilonTransition(first.end, second.start);
+				first.end.isEnd = false;
+
+				return { start: first.start, end: second.end };
+			}
+
+			function union(first, second) {
+				const start = new NFAState(false);
+				addEpsilonTransition(start, first.start);
+				addEpsilonTransition(start, second.start);
+
+				const end = new NFAState(true);
+				addEpsilonTransition(first.end, end);
+				first.end.isEnd = false;
+				addEpsilonTransition(second.end, end);
+				second.end.isEnd = false;
+
+				return { start, end };
+			}
+
+			window.addEventListener('load', (event) => {
+				const output = document.getElementById('output');
+				const parser = new RegExParser('a*b|c');
+				console.log(parser.parse());
+				//output.value = JSON.stringify(fromSymbol('a'));
+			});
+		</script>
+	</head>
+	<body>
+		<header></header>
+		<main>
+			<textarea id="output"></textarea>
+		</main>
+		<footer></footer>
+	</body>
+</html>
