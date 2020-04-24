@@ -5,8 +5,14 @@
 		<meta http-equiv="x-ua-compatible" content="ie=edge" />
 		<meta name="viewport" content="width=device-width,initial-scale=1" />
 		<title>Regex Explorer</title>
-		<style></style>
-		<script type="text/javascript" src="/js/umd.vis-network.min.js"></script>
+		<style>
+			nfaNetwork {
+				width: 600px;
+				height: 400px;
+				border: 1px solid lightgray;
+			}
+		</style>
+		<script type="module" src="js/esm.vis-network.min.js"></script>
 		<script>
 			class State {
 				static nextId() {
@@ -26,28 +32,28 @@
 				constructor(accepting = false) {
 					this.accepting = accepting;
 					this.transitionMap = new Map();
-					this.epsilonTransitions = new Array();
+					this.epsilonTransitionList = new Array();
 					this.id = State.nextId();
 				}
 				addEpsilonTransition(state) {
-					this.epsilonTransitions.push(state);
+					this.epsilonTransitionList.push(state);
 				}
 				addTransitionForSymbol(symbol, state) {
-					let transitions = this.transitionMap.get(symbol);
-					if (!transitions) {
-						transitions = new Array();
-						this.transitionMap.set(symbol, transitions);
+					let transitionList = this.transitionMap.get(symbol);
+					if (!transitionList) {
+						transitionList = new Array();
+						this.transitionMap.set(symbol, transitionList);
 					}
-					transitions.push(state);
+					transitionList.push(state);
 				}
 				getEpsilonClosure() {
 					const closure = new Set([this]);
-					const toVisit = new Set([...this.getEpsilonTransitions()]);
+					const toVisit = new Set([...this.getEpsilonTransitionList()]);
 					while (toVisit.size > 0) {
 						const nextState = toVisit.values().next().value;
 						closure.add(nextState);
 						toVisit.delete(nextState);
-						for (const epsilonState of nextState.getEpsilonTransitions()) {
+						for (const epsilonState of nextState.getEpsilonTransitionList()) {
 							if (!closure.has(epsilonState)) {
 								toVisit.add(epsilonState);
 							}
@@ -55,10 +61,10 @@
 					}
 					return [...closure.values()];
 				}
-				getEpsilonTransitions() {
-					return this.epsilonTransitions;
+				getEpsilonTransitionList() {
+					return this.epsilonTransitionList;
 				}
-				getTransitionsForSymbol(symbol) {
+				getTransitionListForSymbol(symbol) {
 					return this.transitionMap.get(symbol);
 				}
 				test(string, visited = new Set()) {
@@ -70,7 +76,7 @@
 						if (this.accepting) {
 							return true;
 						}
-						for (const nextState of this.getEpsilonTransitions()) {
+						for (const nextState of this.getEpsilonTransitionList()) {
 							if (nextState.test('', visited)) {
 								return true;
 							}
@@ -79,17 +85,54 @@
 					}
 					const symbol = string[0];
 					const rest = string.slice(1);
-					for (const nextState of this.getTransitionsForSymbol(symbol) || []) {
+					for (const nextState of this.getTransitionListForSymbol(symbol) ||
+						[]) {
 						if (nextState.test(rest)) {
 							return true;
 						}
 					}
-					for (const nextState of this.getEpsilonTransitions()) {
+					for (const nextState of this.getEpsilonTransitionList()) {
 						if (nextState.test(string, visited)) {
 							return true;
 						}
 					}
 					return false;
+				}
+			}
+			class NFAIterator {
+				constructor(nfa) {
+					this.visited = new Set();
+					this.toVisit = new Set();
+					this.toVisit.add(nfa.inState);
+				}
+				next() {
+					if (this.hasNext()) {
+						const currentState = this.toVisit.values().next().value;
+						this.visited.add(currentState.id);
+						this.toVisit.delete(currentState);
+						currentState.getEpsilonClosure().forEach((nextState) => {
+							if (!this.visited.has(nextState.id)) {
+								this.toVisit.add(nextState);
+							}
+						});
+
+						for (const symbol of state.transitionMap.keys()) {
+							const transitionList = currentState.getTransitionListForSymbol(
+								symbol,
+							);
+							if (transitionList) {
+								transitionList.forEach((nextState) => {
+									if (!this.visited.has(nextState.id)) {
+										this.toVisit.add(nextState);
+									}
+								});
+							}
+						}
+						return currentState;
+					}
+				}
+				hasNext() {
+					return this.toVisit.size > 0;
 				}
 			}
 			class NFA {
@@ -106,7 +149,7 @@
 						const state = toVisit.values().next().value;
 						visited.add(state);
 						toVisit.delete(state);
-						for (const nextState of state.getEpsilonTransitions()) {
+						for (const nextState of state.getEpsilonTransitionList()) {
 							if (!visited.has(nextState)) {
 								toVisit.add(nextState);
 							}
@@ -121,6 +164,9 @@
 						}
 					}
 					return alphabet;
+				}
+				getIterator() {
+					return new NFAIterator(this);
 				}
 				getTransitionTable() {
 					const visited = new Set();
@@ -152,15 +198,15 @@
 						}
 						let index = 0;
 						for (const symbol of table.headers) {
-							const transitions = state.getTransitionsForSymbol(symbol);
-							if (transitions) {
-								transitions.forEach((nextState) => {
+							const transitionList = state.getTransitionListForSymbol(symbol);
+							if (transitionList) {
+								transitionList.forEach((nextState) => {
 									if (!visited.has(nextState.id)) {
 										toVisit.add(nextState);
 									}
 								});
 							}
-							row.columns[index++] = transitions;
+							row.columns[index++] = transitionList;
 						}
 					}
 					return table;
@@ -170,30 +216,66 @@
 					return this.inState.test(string);
 				}
 				renderNetworkGraph() {
+					const nodeList = [];
+					const edgeList = [];
+					const visited = new Set();
+					const toVisit = new Set();
+					toVisit.add(this.inState);
+					while (toVisit.size > 0) {
+						const currentState = toVisit.values().next().value;
+						visited.add(currentState.id);
+						toVisit.delete(currentState);
+						nodeList.push({
+							id: currentState.id,
+							label: '' + currentState.id,
+						});
+						currentState.getEpsilonClosure().forEach((nextState) => {
+							if (!visited.has(nextState.id)) {
+								toVisit.add(nextState);
+							}
+							edgeList.push({
+								arrows: 'to',
+								from: currentState.id,
+								label: 'ε',
+								to: nextState.id,
+							});
+						});
+
+						for (const symbol of currentState.transitionMap.keys()) {
+							const transitionList = currentState.getTransitionListForSymbol(
+								symbol,
+							);
+							if (transitionList) {
+								transitionList.forEach((nextState) => {
+									if (!visited.has(nextState.id)) {
+										toVisit.add(nextState);
+									}
+									edgeList.push({
+										arrows: 'to',
+										from: currentState.id,
+										label: symbol,
+										to: nextState.id,
+									});
+								});
+							}
+						}
+					}
+
+					console.log('nodes', nodeList);
+					console.log('edges', edgeList);
 					// create an array with nodes
-					var nodes = new vis.DataSet([
-						{ id: 1, label: 'Node 1' },
-						{ id: 2, label: 'Node 2' },
-						{ id: 3, label: 'Node 3' },
-						{ id: 4, label: 'Node 4' },
-						{ id: 5, label: 'Node 5' },
-					]);
+					let nodeDataSet = new vis.DataSet(nodeList);
 
 					// create an array with edges
-					var edges = new vis.DataSet([
-						{ from: 1, to: 3 },
-						{ from: 1, to: 2 },
-						{ from: 2, to: 4 },
-						{ from: 2, to: 5 },
-					]);
+					var edgeDataSet = new vis.DataSet(edgeList);
 
 					// create a network
 					var container = document.getElementById('nfaNetwork');
 
 					// provide the data in the vis format
 					var data = {
-						nodes: nodes,
-						edges: edges,
+						nodes: nodeDataSet,
+						edges: edgeDataSet,
 					};
 					var options = {};
 
@@ -309,13 +391,13 @@
 										.map((state) => state.id),
 								);
 							} else {
-								const transitions = {};
+								const transitionList = {};
 								for (const entry of state.transitionMap.entries()) {
-									transitions[entry[0]] = entry[1][0].name;
+									transitionList[entry[0]] = entry[1][0].name;
 								}
 								const stateCheckString = JSON.stringify([
 									state.accepting,
-									transitions,
+									transitionList,
 								]);
 								if (stateCheckTable.has(stateCheckString)) {
 									stateNameTable.delete(stateName);
@@ -343,14 +425,14 @@
 							string[index],
 							';\n ',
 							state,
-							'.getTransitionsForSymbol(string[',
+							'.getTransitionListForSymbol(string[',
 							index,
 							' ]:',
 							string[index],
 							')=',
-							state.getTransitionsForSymbol(string[index + 1]),
+							state.getTransitionListForSymbol(string[index + 1]),
 						);
-						state = state.getTransitionsForSymbol(string[index++]);
+						state = state.getTransitionListForSymbol(string[index++]);
 						if (state == undefined) {
 							return false;
 						} else {
@@ -468,35 +550,9 @@
 		<footer></footer>
 		<script type="text/javascript">
 			window.addEventListener('load', () => {
-				// create an array with nodes
-				var nodes = new vis.DataSet([
-					{ id: 1, label: 'Node 1' },
-					{ id: 2, label: 'Node 2' },
-					{ id: 3, label: 'Node 3' },
-					{ id: 4, label: 'Node 4' },
-					{ id: 5, label: 'Node 5' },
-				]);
-
-				// create an array with edges
-				var edges = new vis.DataSet([
-					{ from: 1, to: 3 },
-					{ from: 1, to: 2 },
-					{ from: 2, to: 4 },
-					{ from: 2, to: 5 },
-				]);
-
-				// create a network
-				var container = document.getElementById('nfaNetwork');
-
-				// provide the data in the vis format
-				var data = {
-					nodes: nodes,
-					edges: edges,
-				};
-				var options = {};
-
-				// initialize your network!
-				var network = new vis.Network(container, data, options);
+				const parser = new RegexParser();
+				const nfa = parser.parse('xy*|z');
+				nfa.renderNetworkGraph();
 			});
 		</script>
 	</body>
