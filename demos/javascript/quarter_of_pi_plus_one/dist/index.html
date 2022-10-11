@@ -5,10 +5,34 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>𝛑 / 4 + 1</title>
+    <style>
+      body {
+        margin: 0;
+        padding:0;
+        position:relative;
+        min-width: 100%;
+        min-height:100vh;
+      }
+      #welcome-screen {
+        background-color: #fffff;
+        position:absolute;
+        min-width: 100%;
+        min-height:100%;
+      }
+      #demo {
+        display: none;
+        place-items:  center;
+        position:absolute;
+        min-width: 100%;
+        min-height:100%;
+      }
+      </style>
   </head>
   <body>
+    <div id="welcome-screen">
     <button id="start-button" type="button">Start</button>
-    <div id="app"></div>
+    </div>
+    <div id="demo"></div>
     <script>
       window.neoart = Object.create(null);
 
@@ -1844,7 +1868,7 @@ async function createSineScrollCopperScreen(canvas) {
   };
 }
 const canvas = document.createElement("canvas");
-document.getElementById("app")?.appendChild(canvas);
+document.getElementById("demo").appendChild(canvas);
 const context = canvas.getContext("2d");
 if (context) {
   canvas.width = 1280; // window.innerWidth;
@@ -1852,6 +1876,25 @@ if (context) {
 }
 
       document.getElementById("start-button").addEventListener("click", (e) => {
+        const welcomeScreen = document.getElementById("welcome-screen")
+        welcomeScreen.style.display = "none"
+        const demo = document.getElementById("demo")
+        demo.style.display = "grid"
+        document.body.style.backgroundColor="#000000"
+        if(!demo.requestFullscreen) {
+        demo.webkitRequestFullscreen()
+        } else {
+          demo.requestFullscreen()
+        }
+        const demoCanvas = document.querySelector("#demo canvas")
+        const dx=window.innerWidth/canvas.width
+        const dy=window.innerHeight/canvas.height
+        if(dx>dy) {
+          demoCanvas.style.transform = `scale(${dy})`
+        }else{
+          demoCanvas.style.transform = `scale(${dx})`
+        }
+        console.log(dx,dy)
         let player = null;
         fetch(
           "https://api.modarchive.org/downloads.php?moduleid=56660#projectx.mod"

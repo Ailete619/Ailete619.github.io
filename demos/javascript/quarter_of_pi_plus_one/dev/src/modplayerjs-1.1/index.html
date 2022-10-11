@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <!--webaudio polyfills-->
+    <script type="text/javascript" src="js/get-float-time-domain-data.min.js"></script>
+    <script type="text/javascript" src="js/audioworklet-polyfill.js"></script>
+    <!--some usefull js stuff-->
+    <script type="text/javascript" src="js/utils.js"></script>
+    <script type="text/javascript" src="js/modplayer.js"></script>
+</head>
+
+<body>
+    <script type="text/javascript">
+        ModPlayer.init({
+            autoPlay: true
+        })
+            .then(() => {
+                ModPlayer.loadModule('https://api.modarchive.org/downloads.php?moduleid=68835#desert_strike.mod');
+            }).catch((err) => {
+                toast.show(`Error loading module: ${err}`);
+            });    
+    </script>
+    <button onclick="ModPlayer.play()">play</button>
+    <button onclick="ModPlayer.stop()">stop</button>
+</body>
+
+</html>

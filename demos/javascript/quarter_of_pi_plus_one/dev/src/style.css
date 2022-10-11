@@ -1,0 +1,20 @@
+body {
+    margin: 0;
+    padding:0;
+    position:relative;
+    min-width: 100%;
+    min-height:100vh;
+  }
+  #welcome-screen {
+    background-color: #fffff;
+    position:absolute;
+    min-width: 100%;
+    min-height:100%;
+  }
+  #demo {
+    display: none;
+    place-items:  center;
+    position:absolute;
+    min-width: 100%;
+    min-height:100%;
+  }
