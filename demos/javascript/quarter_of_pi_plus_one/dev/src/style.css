@@ -1,20 +1,42 @@
 body {
-    margin: 0;
-    padding:0;
-    position:relative;
-    min-width: 100%;
-    min-height:100vh;
-  }
-  #welcome-screen {
-    background-color: #fffff;
-    position:absolute;
-    min-width: 100%;
-    min-height:100%;
-  }
-  #demo {
-    display: none;
-    place-items:  center;
-    position:absolute;
-    min-width: 100%;
-    min-height:100%;
-  }
+  font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+  font-size: 16px;
+  font-style: normal;
+  margin: 0;
+  padding: 0;
+  position: relative;
+  min-width: 100%;
+  min-height: 100vh;
+}
+#welcome-screen {
+  background-color: #fffff;
+  min-height: 100%;
+  min-width: 100%;
+  position: absolute;
+}
+#welcome-screen .content {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  justify-content: space-between;
+  min-height: 100%;
+  padding: 4rem 2rem;
+}
+#welcome-screen #title {
+  font-family: "Lucida Console", "Lucida Sans Typewriter", monaco,
+    "Bitstream Vera Sans Mono", monospace;
+  font-size: 20px;
+  font-style: normal;
+}
+#welcome-screen #start-button {
+  font-size: 64px;
+}
+#demo {
+  background-color: #000000;
+  display: none;
+  min-width: 100%;
+  min-height: 100%;
+  place-items: center;
+  position: absolute;
+}

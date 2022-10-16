@@ -3,7 +3,7 @@ export function createScreen(screen: (time: number) => boolean, fps: number) {
   let previousTime: number;
   let screenFinished = false;
 return ():Promise<boolean> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, _reject) => {
       function nextTick(time: number) {
         if (time - previousTime > intervalTime) {
           previousTime = time;
@@ -33,7 +33,7 @@ export async function getRawImageData(
 ): Promise<Uint8ClampedArray> {
   const imageLoadingElement = document.createElement("img") as HTMLImageElement;
   return new Promise((resolve, reject) => {
-    imageLoadingElement.onload = (event) => {
+    imageLoadingElement.onload = (_event) => {
       const imageLoadingCanvas: HTMLCanvasElement = document.createElement(
         "canvas"
       ) as HTMLCanvasElement;

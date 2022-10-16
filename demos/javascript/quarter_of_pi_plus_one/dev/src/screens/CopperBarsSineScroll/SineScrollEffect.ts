@@ -11,70 +11,100 @@ export async function createSineScrollEffect(canvas: HTMLCanvasElement) {
   // sine scroll effect init
   const rowWidth = canvas.width * 4;
   const scrollText =
-    "        HELLO EVERYONE!        LET'S WISH A HAPPY BIRTHDAY TO GERION!                ASIMOV OF MAD DOGS PROUDLY PRESENTS \"PI/4+1\"! THIS IS MY FIRST NEW PRODUCTION AFTER 27 YEARS AND I CODED IT ESPECIALLY FOR THE BIRTHDAY OF GERION.\
- I HAVE BEEN WANTING TO DO THIS KIND OF THING FOR A LONG TIME TO SEND TO FAMILY AND FRIENDS FOR BIRTHDAYS, CHRISTMAS AND NEW YEAR, INSTEAD OF SENDING RANDOM PICS COPY PASTED FROM THE INTERNET ...\
- AND RECENTLY GERION STARTED TALKING (A LOT) ABOUT THE APPOLLO VAMPIRE V4 STANDALONE, AND I GOT NOSTALGIC ABOUT AMIGA AND DEMOS.        ( T _ T )        \
- BUT I SOLD MY LAST AMIGA A LONG TIME AGO AND I HAVE FORGOTTEN THE LITTLE M68K ASSEMBLY I KNEW BACK IN THE DAY, SO I CODED THIS LITTLE DEMO IN JAVASCRIPT ...\
- STAY TUNED BECAUSE MORE ARE TO FOLLOW ...        :-)        IN JAVACRIPT ... OR M68K! GERION BOUGHT HIMSELF A VAMPIRE STANDALONE FOR HIS BIRTHDAY, SO I MIGHT FIRE UP UAE OR VASM TO TRY TO CODE SOME OLDSCHOOL ASM DEMO AND HAVE HIM TEST IT ON HIS MACHINE AS I CAN'T AFFORD ONE AT THE MOMENT ...\
-                ";
+  "        WELCOME BACK!        "+
+  "GERION DID ALSO SELL HIS LAST AMIGA SOME TIME AGO ... "+
+  "BUT I GUESS HE FELT HE NEEDED ONE AGAIN BECAUSE AFTER TELLING ME ABOUT IT FOR SOME TIME, "+
+  "HE FINALLY BOUGHT HIMSELF A VAMPIRE STANDALONE FOR HIS BIRTHDAY! " +
+  "                " +
+  "BUYING AN ORIGINAL AMIGA AND BOOSTING IT WITH ACCELERATION CARDS AND GRAPHIC CARDS IS QUITE EXPENSIVE, AND REQUIRE A LOT OF MAINTENANCE ... " +
+  "AND THE VAMPIRE STANDALONE IMPROVES ON THE CHIPSET AND THE OLD M68K PROCESSOR, WHILE BEING CHEAPER. " +
+  "I KNOW THIS IS A SENSITIVE TOPIC FOR A LOT OF PEOPLE WHO FEEL THAT THE NEW FUNCTIONALITIES BEING SPECIFIC TO THE APOLLO CORE AND NOT BACKWARD COMPATIBLE WITH CLASSIC AMIGAS ARE NOT NEEDED, " +
+  "BUT FOR ME, MY NEXT AMIGA WILL BE A VAMPIRE STANDALONE BECAUSE I FEEL IT MAKES THE PLATFORM EVOLVE WHILE MAINTAINING THE M68K HERITAGE. " +
+  "BUT THAT IS JUST MY FEELING, I AM NOT A PURIST AND I DON'T WANT TO START AN ARGUMENT :-P " +
+  "                " +
+  "GERION WANTS TO FIT HIS STANDALONE IN AN A1200 SHELL, SO HE'LL BE BUSY WITH THIS HARDWARE PROJECT. "+
+  "I HOPE HE STILL GETS THE TIME TO DO SOME GRAPHICS TOO! " +
+  "                " +
+  "HE HAS SOME AMBITIOUS DEMO IDEAS TOO, SO I NEED TO STEP UP MY GAME TOO! " +
+  "                " +
+  "NOWDAYS WE ARE BUSY WITH WORK AND FAMILY, I WISH I HAD CODED MORE IN 1995 AND PLAYED LESS!" +
+  "        :-P        " +
+  "NO REGRETS, I LOVED GAMES. I REMEMBER PLAYING POWERMONGER, SYNDICATE, DUNE, ... I WISH I HAD THE TIME TO PLAY SOME GAMES NOW!" +
+  "                " +
+  "GERION WAS INTO SOCCER GAMES LIKE KICK OFF ..." +
+  "                " +
+  "MY MOM WOULD COOK FOR ALL OF US, WHEN WE HAD AN AMIGA MEETUP AT OUR HOUSE TO TALK, SWAP DEMOS AND GAMES ..." +
+  "                " +
+  "FUN TIMES! :-)" +
+  "                " +
+  "STILL READING? I DON'T KOW WHAT TO WRITE ABOUT ..." +
+  "                " +
+  "OH YES! THERE IS A BUG IN THE PREVIOUS SCREEN, THE LOGO SHOULD BE GRAY AND NOT PURPLE, BEFORE THAT IT WAS GREEN ... "+
+  "MUST BE THE LOADING ROUTINE BUT IT IS FINE WITH THE FONTS AND THE LOGO IN THS SCREEN ... I HAD NO TIME TO DEBUG IT AS I MUST RELEASE!" +
+  "                " +
+  "STILL READING? WELL LET'S GO TO THE NEXT PART ..." +
+  "                ";
   let sineXOffset = 0;
   const sineYOffset = 496;
   const sineAmplitude = 240;
   let scrollTextPosition = 0;
   let scrollPixelPosition = canvas.width;
   // load font
-  let charactersDataMap: { [key: string]: (number[] | undefined)[][] } = await getRawImageData(fontData.data).then(
-    (fontRawData: Uint8ClampedArray) => {
-      const charactersDataMap: { [key: string]: (number[] | undefined)[][] } =
-        {};
-      const characterMap =
-        "!\"#$%&'()*+,-./0123456789:?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_~";
-      for (
-        let characterMapIndex = 0;
-        characterMapIndex < 56;
-        characterMapIndex += 1
-      ) {
-        const table = [];
-        const mapIndex = characterMap.indexOf(characterMap[characterMapIndex]);
-        const characterColumn = (mapIndex % 8) * 64;
-        const characterRow = Math.floor(mapIndex / 8) * fontData.width * 64;
+  let charactersDataMap: { [key: string]: (number[] | undefined)[][] } =
+    await getRawImageData(fontData.data).then(
+      (fontRawData: Uint8ClampedArray) => {
+        const charactersDataMap: { [key: string]: (number[] | undefined)[][] } =
+          {};
+        const characterMap =
+          "!\"#$%&'()*+,-./0123456789:?@ABCDEFGHIJKLMNOPQRSTUVWXYZ_~";
         for (
-          let pixelColumnIndex = 0;
-          pixelColumnIndex < 64;
-          pixelColumnIndex += 1
+          let characterMapIndex = 0;
+          characterMapIndex < 56;
+          characterMapIndex += 1
         ) {
-          const pixelColumn = [];
-          const columnPosition =
-            characterColumn * 4 + characterRow * 4 + pixelColumnIndex * 4;
+          const table = [];
+          const mapIndex = characterMap.indexOf(
+            characterMap[characterMapIndex]
+          );
+          const characterColumn = (mapIndex % 8) * 64;
+          const characterRow = Math.floor(mapIndex / 8) * fontData.width * 64;
           for (
-            let pixelIndex = 0;
-            pixelIndex < fontData.width * 4 * 64;
-            pixelIndex += fontData.width * 4
+            let pixelColumnIndex = 0;
+            pixelColumnIndex < 64;
+            pixelColumnIndex += 1
           ) {
-            const pixelPosition = columnPosition + pixelIndex;
-            if (
-              (fontRawData[pixelPosition] === 255 &&
-                fontRawData[pixelPosition + 1] === 0 &&
-                fontRawData[pixelPosition + 2] === 255) ||
-              fontRawData[pixelPosition + 3] === 0
+            const pixelColumn = [];
+            const columnPosition =
+              characterColumn * 4 + characterRow * 4 + pixelColumnIndex * 4;
+            for (
+              let pixelIndex = 0;
+              pixelIndex < fontData.width * 4 * 64;
+              pixelIndex += fontData.width * 4
             ) {
-              pixelColumn.push(undefined);
-            } else {
-              pixelColumn.push([
-                fontRawData[pixelPosition],
-                fontRawData[pixelPosition + 1],
-                fontRawData[pixelPosition + 2],
-              ]);
+              const pixelPosition = columnPosition + pixelIndex;
+              if (
+                (fontRawData[pixelPosition] === 255 &&
+                  fontRawData[pixelPosition + 1] === 0 &&
+                  fontRawData[pixelPosition + 2] === 255) ||
+                fontRawData[pixelPosition + 3] === 0
+              ) {
+                pixelColumn.push(undefined);
+              } else {
+                pixelColumn.push([
+                  fontRawData[pixelPosition],
+                  fontRawData[pixelPosition + 1],
+                  fontRawData[pixelPosition + 2],
+                ]);
+              }
             }
+            table.push(pixelColumn);
           }
-          table.push(pixelColumn);
+          charactersDataMap[characterMap[characterMapIndex]] = table;
         }
-        charactersDataMap[characterMap[characterMapIndex]] = table;
+        return charactersDataMap;
       }
-      return charactersDataMap;
-    }
-  );
-  return (time: number, data: Uint8ClampedArray): boolean => {
+    );
+  return (_time: number, data: Uint8ClampedArray): boolean => {
     let isEffectDone = false;
     if (charactersDataMap) {
       // draw sine scroll
@@ -128,7 +158,7 @@ export async function createSineScrollEffect(canvas: HTMLCanvasElement) {
           }
         }
       }
-      scrollPixelPosition -= 16;
+      scrollPixelPosition -= 12;
       if (scrollPixelPosition < -64) {
         scrollTextPosition += 1;
         scrollPixelPosition = 0;

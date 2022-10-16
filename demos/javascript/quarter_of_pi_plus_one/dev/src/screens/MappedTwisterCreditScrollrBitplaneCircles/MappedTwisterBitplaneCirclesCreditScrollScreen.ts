@@ -1,11 +1,31 @@
-import { fadeScreen, getRawImageData } from "../../Demos";
+import { fadeScreen } from "../../Demos";
 import { createBitplaneCirclesEffect } from "./BitplaneCirclesEffect";
 import { createCreditScrollEffect } from "./CreditScrollEffect";
 import { createMappedTwisterEffect } from "./MappedTwisterEffect";
+import FlodPlayer from "funkymed-flod-module-player/src/FlodPlayer";
+import ajaxLoader from "funkymed-flod-module-player/src/ajaxLoader";
 
 export async function createMappedTwisterBitplaneCirclesCreditScrollScreen(
   canvas: HTMLCanvasElement
 ) {
+  function onModuleProgress(event: any) {
+    if (event.lengthComputable) {
+      const percentage = Math.round((event.loaded / event.total) * 100);
+      console.log(percentage);
+    }
+  }
+
+  let player: any = null;
+  function onModuleLoaded(bytes: any[]) {
+    if (player) {
+      player.stop();
+    }
+    player = FlodPlayer.load(bytes);
+    player.loopSong = true;
+    player.play();
+  }
+
+  ajaxLoader("critical.mod", onModuleLoaded, onModuleProgress);
   const context = canvas.getContext("2d");
   if (!context) {
     console.error("Error: canvas's context not found");
@@ -19,13 +39,11 @@ export async function createMappedTwisterBitplaneCirclesCreditScrollScreen(
   const drawCreditScroll = await createCreditScrollEffect(canvas);
   // sine scroll effect init
   const drawMappedTwister = await createMappedTwisterEffect(canvas);
-  // * * * * loading operations * * * *
-  const imageLoadingPromises = [];
   // fade in and out
   let fadeOpacity = 255;
   // * * * * steps * * *
   let step = 0;
-  document.addEventListener("click", (event) => {
+  document.addEventListener("click", (_event) => {
     step = 4;
   });
   return (time: number): boolean => {
@@ -33,9 +51,9 @@ export async function createMappedTwisterBitplaneCirclesCreditScrollScreen(
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
     // draw bitplane circles
-    const isBitplaneCirclesFinished = drawBitplaneCircles(time, data);
+    drawBitplaneCircles(time, data);
     // draw twister
-    const isTwisterFinished = drawMappedTwister(time, data);
+    drawMappedTwister(time, data);
     if (step === 0) {
       fadeOpacity = 0;
       step = 1;
@@ -63,6 +81,9 @@ export async function createMappedTwisterBitplaneCirclesCreditScrollScreen(
       fadeOpacity -= 1;
       if (fadeOpacity < 0) {
         isScreenFinished = true;
+        if (player) {
+          player.stop();
+        }
       }
     }
     context.putImageData(imageData, 0, 0);

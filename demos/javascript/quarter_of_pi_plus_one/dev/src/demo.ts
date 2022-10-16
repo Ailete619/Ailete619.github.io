@@ -20,7 +20,7 @@ if (context) {
 
 document
   .getElementById("start-button")
-  ?.addEventListener("click", async (event) => {
+  ?.addEventListener("click", async (_event) => {
     const welcomeScreen = document.getElementById("welcome-screen");
     if (!welcomeScreen) {
       console.error('"#welcome-screen" element not found.');
@@ -63,22 +63,23 @@ document
     }
     const startFirstScreen = createScreen(
       await create3DVectorsStarfieldScrollScreen(canvas),
-      24
+      50
     );
     const isFirstScreenFinished = await startFirstScreen();
     if (isFirstScreenFinished === true) {
       const startSecondScreen = createScreen(
         await createCopperBarsSineScrollScreen(canvas),
-        30
+        50
       );
       const isSecondScreenFinished = await startSecondScreen();
       if (isSecondScreenFinished === true) {
         const startThirdScreen = createScreen(
           await createMappedTwisterBitplaneCirclesCreditScrollScreen(canvas),
-          30
+          50
         );
         const isThirdScreenFinished = await startThirdScreen();
         if (isThirdScreenFinished === true) {
+          document.body.style.backgroundColor = "#ffffff";
           welcomeScreen.style.display = "block";
           demo.style.display = "none";
         }

@@ -6,7 +6,7 @@ function createAmigaCheckboard(
   width: number,
   height: number,
   cols: number,
-  rows: number
+  _rows: number
 ): Uint8ClampedArray {
   const data = new Uint8ClampedArray(height * width * 4);
   const size = width / cols;
@@ -229,7 +229,7 @@ export async function createMappedTwisterEffect(canvas: HTMLCanvasElement) {
         return rows;
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         return [] as number[][][];
       })
   );
@@ -269,7 +269,7 @@ export async function createMappedTwisterEffect(canvas: HTMLCanvasElement) {
         return rows;
       })
       .catch((error) => {
-        console.log(error);
+        console.error(error);
         return [] as number[][][];
       })
   );
@@ -279,14 +279,12 @@ export async function createMappedTwisterEffect(canvas: HTMLCanvasElement) {
     logoPixelData = loadedAndProcessedData[1] as number[][][];
   });
 
-  const offset = canvas.width - 200;
   let rotation = 0;
 
-  return (time: number, data: Uint8ClampedArray): boolean => {
+  return (_time: number, data: Uint8ClampedArray): boolean => {
     let isEffectFinished = false;
     // draw twister
     for (let y = 0; y < canvas.height; y += 1) {
-      const line = y * canvas.width * 4;
       let aa =
         Math.sin(rotation - 2 * Math.PI) * 32 -
         Math.sin(y * 2 * Math.PI) * 16 +
@@ -296,7 +294,6 @@ export async function createMappedTwisterEffect(canvas: HTMLCanvasElement) {
       let x2 = Math.round(Math.sin(seed + Math.PI / 2) * 100);
       let x3 = Math.round(Math.sin(seed + Math.PI) * 100);
       let x4 = Math.round(Math.sin(seed + (3 * Math.PI) / 2) * 100);
-      const lineStart = line + offset * 4;
 
       if (x1 < x2) {
         drawMappedLine(
@@ -346,7 +343,7 @@ export async function createMappedTwisterEffect(canvas: HTMLCanvasElement) {
           x1
         );
       }
-      rotation += Math.PI * 0.00005;
+      rotation += Math.PI * 0.00002;
       if (rotation > 2 * Math.PI) {
         rotation -= 2 * Math.PI;
       }

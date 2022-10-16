@@ -90,7 +90,7 @@ export async function createCopperBarsEffect(canvas: HTMLCanvasElement) {
         destinationPosition += 4;
       }
     }
-    shadeIndex += 4;
+    shadeIndex += 2;
     return isEffectFinished;
   };
 }
