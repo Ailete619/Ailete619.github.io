@@ -189,7 +189,7 @@ export async function createCreditScrollEffect(canvas: HTMLCanvasElement) {
     "",
     "All coded by me (Asimov)",
     "In Typescript, using VSCode & Vite,",
-    "Except for the \™funkymed-flod-module-player\™",
+    "Except for the \"funkymed-flod-module-player\"",
     "Created by Christian Corti Neoart Costa Rica",
     "And updated to ES6 by Cyril Pereira",
     "",
