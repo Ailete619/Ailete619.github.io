@@ -189,7 +189,7 @@ export async function createCreditScrollEffect(canvas: HTMLCanvasElement) {
     "",
     "All coded by me (Asimov)",
     "In Typescript, using VSCode & Vite,",
-    "Except for the \"funkymed-flod-module-player\"",
+    'Except for the "funkymed-flod-module-player"',
     "Created by Christian Corti Neoart Costa Rica",
     "And updated to ES6 by Cyril Pereira",
     "",
@@ -430,8 +430,8 @@ export async function createCreditScrollEffect(canvas: HTMLCanvasElement) {
       const lineY =
         (scrollPixelPosition + i * (fontHeight + lineSpace)) * canvas.width * 4;
       for (let c of line) {
-        const charData = charactersDataMap[c];
-        if (c !== " ") {
+        if (c in charactersDataMap) {
+          const charData = charactersDataMap[c];
           for (let row = 0; row < fontHeight; row += 1) {
             const rowPos = lineY + lineX + row * canvas.width * 4;
 
@@ -445,6 +445,10 @@ export async function createCreditScrollEffect(canvas: HTMLCanvasElement) {
                 data[dPos + 3] = 255;
               }
             }
+          }
+        } else {
+          if(c!== " ") {
+            console.warn(`Erroneous character on line ${scrollTextPosition + i}:"${line}", character '${c}' is not handled by the font!`)
           }
         }
         lineX += (fontWidth + fontSpace) * 4;
